@@ -1,0 +1,111 @@
+server:
+  port: 8091
+
+logging:
+  level:
+    net.cdsunrise: ${LOG_LEVEL:DEBUG}
+
+#mybatis-plus配置
+mybatis-plus:
+  mapper-locations: classpath:/mappers/*Mapper.xml
+
+spring:
+  application:
+    name: intelligent-building-acquisition
+  #数据库连接池
+  datasource:
+    druid:
+      url: jdbc:mysql://${MYSQL_ADDRESS:192.168.10.66:3306}/ztyg_gather_center?useUnicode=true&characterEncoding=UTF8&serverTimezone=GMT%2B8
+      username: ${MYSQL_USERNAME:root}
+      password: ${MYSQL_PASSWORD:123456}
+      name: ztyg_gather_center
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      initial-size: 1
+      max-active: 20
+      min-idle: 1
+      max-wait: 60000
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 'x'
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      filter:
+        stat:
+          enabled: true
+  # json序列化/反序列化
+  jackson:
+    date-format: "yyyy-MM-dd HH:mm:ss"
+    time-zone: "Asia/Shanghai"
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+  mvc:  
+    static-path-pattern: /images/**
+  resources:  
+    static-locations: ${PICTURE_ADDR:file:C:\\picture\\person,file:C:\\picture\\event} #第一个地址为头像地址，第二个地址为抓拍地址(必须)
+
+# 采集Master配置
+gather:
+  vrv:
+    ip: ${VRV_IP:192.168.4.203}
+    port: ${VRV_PORT:40111}
+  meter:
+    ip: ${METER_IP:127.0.0.1}
+    port: ${METER_PORT:502}
+  ils:
+    ip: ${ILS_IP:192.168.4.204}
+    port: ${ILS_PORT:4001}
+  sensor:
+    b1:
+      ip: ${METER_IP:192.168.4.210}
+      port: ${METER_PORT:502}
+    f1:
+      ip: ${METER_IP:192.168.4.220}
+      port: ${METER_PORT:502}
+    f2:
+      ip: ${METER_IP:192.168.4.230}
+      port: ${METER_PORT:502}
+    f3:
+      ip: ${METER_IP:192.168.4.240}
+      port: ${METER_PORT:502}
+    f4:
+      ip: ${METER_IP:192.168.4.250}
+      port: ${METER_PORT:502}
+# 海康威视
+hikvision:
+  host: ${HKV_HOST:192.168.4.100:8001}
+  app-key: ${APP_KEY:23504248}
+  app-secret: ${APP_SECRET:gcSWlBq3JFvEZ9VagSNB}
+  native-ip: ${NATIVE_IP:192.168.4.200}
+  enable_subscription: ${SUBSCRIPTION:false}
+  picture_address: ${PICTURE_ADDRESS:http://192.168.4.200:8091/images} #和spring.mvc.static-path-pattern 对应
+  
+# RS485协议netty参数
+netty:
+  rs485:
+    # 协议开关
+    enable: false
+    # boss线程数量
+    bossThreadNum: 4
+    #worker线程数量
+    workerThreadNum: 50
+    soBackLog: 1024
+    soKeepalive: true
+    #1024*1024
+    soRcvbuf: 1048576
+    #10*1024*1024
+    soSndbuf: 10485760
+    tcpNodelay: true
+    #0表示不开启心跳
+    readerIdleTimeSeconds: 5
+    writerIdleTimeSeconds: 0
+    allIdleTimeSeconds: 0
+    ip: 127.0.0.1
+    tcpPort : 502
+
+sys:
+  token-expire: 3600000
+  level-code-digit: 4
+
+schedule:
+  enabled: ${SCHEDULT_SWITCH:false} #是否开启定时任务，如果为false，则定时任务不启动

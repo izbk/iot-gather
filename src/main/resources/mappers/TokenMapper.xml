@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.cdsunrise.ztyg.acquisition.usermanage.mapper.TokenMapper">
+	<resultMap id="BaseResultMap" type="net.cdsunrise.ztyg.acquisition.usermanage.domain.Token">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="user_id" jdbcType="BIGINT" property="userId" />
+		<result column="client_id" jdbcType="BIGINT" property="clientId" />
+		<result column="last_access_time" jdbcType="VARCHAR" property="lastAccessTime" />
+		<result column="user_info" jdbcType="VARCHAR" property="userInfo" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="version" jdbcType="INTEGER" property="version"/>
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		id,user_id,client_id,last_access_time,user_info,create_time,version
+	</sql>
+	
+	<select id="findByToken" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sys_token where token = #{token}
+	</select>
+	
+	
+	<insert id="insert" parameterType="net.cdsunrise.ztyg.acquisition.usermanage.domain.Token" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_token(token, user_id, client_id, last_access_time, user_info, create_time, version) values(#{token},#{userId},#{clientId},#{lastAccessTime},#{userInfo},#{createTime},#{version})
+	</insert>
+	
+	<select id="findKeyByToken" parameterType="java.lang.String" resultType="java.lang.String">
+    	select key_ from sys_token t left join sys_client uc on t.client_id = uc.id where t.token =#{token} 
+  	</select>
+  	
+  	<update id="updateUserByToken" parameterType="map">
+  		update sys_token
+		set user_id = #{userId},
+		user_info = #{userInfo}
+		where token = #{token}
+  	</update>
+  	
+  	<delete id="deleteByToken" parameterType="java.lang.String">
+		delete from sys_token where token = #{token}
+	</delete>
+	
+	<delete id="deleteByUserId" parameterType="java.lang.Long">
+		delete from sys_token where user_id = #{userId}
+	</delete>
+	
+	<delete id="deleteExpireTokenByUserId" parameterType="map">
+		delete from sys_token where user_id = #{userId} and token_ != #{token}
+	</delete>
+	
+	<update id="updateLastAccessTimeByToken" parameterType="map">
+  		update sys_token
+		set last_access_time = #{lastAccessTime}
+		where token = #{token}
+  	</update>
+	
+	<delete id="deleteOuttimeTokens" parameterType="java.util.Date">
+		delete from sys_token where UNIX_TIMESTAMP(last_access_time_) &lt; UNIX_TIMESTAMP(#{outTime})
+	</delete>
+	
+	<select id="findUserIdByToken" parameterType="java.lang.String" resultType="java.lang.Long">
+	    select user_id as userId from sys_token where token = #{token}
+	</select>
+
+</mapper>

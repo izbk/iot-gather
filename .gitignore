@@ -1,0 +1,35 @@
+HELP.md
+target/
+classes/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
+.idea/
+.settings
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+*.hprof
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+### VS Code ###
+.vscode/
+
+src/main/.DS_Store
+src/main/java/.DS_Store
+src/main/java/net/.DS_Store
+src/main/java/net/cdsunrise/.DS_Store
+src/main/java/net/cdsunrise/hy/.DS_Store
+src/main/java/net/cdsunrise/hy/lyxxfb/.DS_Store
+src/main/java/net/cdsunrise/hy/lyxxfb/iip/.DS_Store
+src/main/resources/.DS_Store
+*.DS_Store

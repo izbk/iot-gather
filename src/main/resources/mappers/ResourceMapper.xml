@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.cdsunrise.ztyg.acquisition.usermanage.mapper.ResourceMapper">
+	<resultMap id="BaseResultMap" type="net.cdsunrise.ztyg.acquisition.usermanage.domain.Resource">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="code" jdbcType="VARCHAR" property="code" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+		<result column="parent_id" jdbcType="BIGINT" property="parentId" />
+		<result column="parent_ids" jdbcType="VARCHAR" property="parentIds" />
+		<result column="type" jdbcType="INTEGER" property="type" />
+		<result column="index_num" jdbcType="INTEGER" property="indexNum" />
+		<result column="icon_path" jdbcType="VARCHAR" property="iconPath" />
+		<result column="url" jdbcType="VARCHAR" property="url" />
+		<result column="last_node" jdbcType="INTEGER" property="lastNode" />
+		<result column="request_method" jdbcType="VARCHAR" property="requestMethod" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="edit_time" jdbcType="TIMESTAMP" property="editTime" />
+		<result column="version" jdbcType="INTEGER" property="version"/>
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, code, name, parent_id, parent_ids, type, index_num,
+		icon_path, url,
+		last_node, request_method,
+		create_time,
+		edit_time,version
+	</sql>
+
+	<select id="findChildrenById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		select t.id, t.code, t.name, t.parent_id, t.parent_ids, t.type, t.index_num,
+			t.icon_path, t.url, t.last_node, t.request_method, t.create_time,
+		  t.edit_time, ur.name_ as parent_name, t.version  from sys_resource t left join sys_resource ur on t.parent_id =ur.id
+		<where>
+			<if test="id != null">
+				t.parent_id = #{id}
+			</if>
+			<if test="id == null">
+				t.parent_id is null
+			</if>
+		</where>
+		order by index_num
+	</select>
+	
+	<delete id="deleteByResourceIdsFromRR" parameterType="list">
+		delete from sys_role_resource where resource_id in
+		<foreach collection="array" item="resourceId" open="(" separator=","
+			close=")">
+			#{resourceId}
+		</foreach>
+	</delete>
+	
+	<select id="findResourcesByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			ur.* 
+		FROM
+			sys_user_role t
+			LEFT JOIN sys_role_resource urr ON t.role_id = urr.role_id
+			LEFT JOIN sys_resource ur ON urr.resource_id = ur.id 
+		WHERE
+			t.user_id = #{userId}
+	</select>
+	
+	<select id="findResourceByRoleIdFromRR"  parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			ur.* 
+		FROM
+			sys_role_resource t
+			LEFT JOIN sys_resource ur ON t.resource_id = ur.id
+		WHERE
+			t.role_id = #{roleId}
+	</select>
+	
+	<select id="findByParams" parameterType="map"
+		resultMap="BaseResultMap">
+		select
+		t.id, t.code, t.name, t.parent_id, ur.name_ as parentName, t.parent_ids, t.type, t.index,
+		t.icon_path, t.url,
+		t.last_node, t.request_method,
+		t.create_time,
+		t.edit_time,t.version
+		
+		from sys_resource t left join sys_resource ur on t.parent_id =ur.id
+		<where>
+			<if test="code != null and code != ''">
+				t.code_ like "%"#{code}"%"
+			</if>
+			<if test="name != null and name != ''">
+				and t.name_ like "%"#{name}"%"
+			</if>
+			<if test="type != null and type != ''">
+				and t.type = #{type}
+			</if>
+			<if test="url != null and url != ''">
+				and t.url_ like "%"#{url}"%"
+			</if>
+			<if test="lastNode != null and lastNode != ''">
+				and t.last_node = #{lastNode}
+			</if>
+			<if test="requestMethod != null and requestMethod != ''">
+				and t.request_method = #{requestMethod}
+			</if>
+			<if test="ids != null">
+				and t.id in
+				<foreach collection="ids" item="id" open="(" separator="," close=")" >
+					#{id}
+				</foreach>
+			</if>
+		</where>
+		order by id desc
+	</select>
+	<select id="selectByPrimaryKeys" parameterType="list" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from sys_resource
+		where id in
+		<foreach collection="array" item="id" open="(" separator="," close=")" >
+			#{id}
+		</foreach>
+	</select>
+</mapper>

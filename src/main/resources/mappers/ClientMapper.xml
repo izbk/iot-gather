@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.cdsunrise.ztyg.acquisition.usermanage.mapper.ClientMapper">
+	<resultMap id="baseResultMap" type="net.cdsunrise.ztyg.acquisition.usermanage.domain.Client">
+		<id column="id" jdbcType="BIGINT" property="id" />
+		<result column="client_id" jdbcType="VARCHAR" property="clientId" />
+		<result column="client_secret" jdbcType="VARCHAR" property="clientSecret" />
+		<result column="client_type" jdbcType="VARCHAR" property="clientType" />
+		<result column="key_secret" jdbcType="VARCHAR" property="keySecret" />
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+		<result column="version" jdbcType="INTEGER" property="version"/>
+	</resultMap>
+
+
+	<sql id="baseColumnList">
+		id,client_id,client_secret,client_type,key_secret,create_time,version
+	</sql>
+	
+	<select id="findByClientId" parameterType="java.lang.String"
+		resultMap="baseResultMap">
+		select
+		<include refid="baseColumnList" />
+		from sys_client
+		where client_id = #{clientId}
+	</select>
+	
+	<select id="findById" parameterType="java.lang.Long"
+		resultMap="baseResultMap">
+		select
+		<include refid="baseColumnList" />
+		from sys_client
+		where id = #{id}
+	</select>
+	
+	<insert id="insert" parameterType="net.cdsunrise.ztyg.acquisition.usermanage.domain.Client" useGeneratedKeys="true" keyProperty="id">
+		insert into sys_client(client_id, client_secret, key_secret, client_type, create_time, version) values(#{clientId},#{clientSecret},#{keySecret},#{clientType},#{createTime},#{version})
+	</insert>
+</mapper>
