@@ -194,7 +194,7 @@ public class DataProcessServiceImpl implements DataProcessService {
         String typeCode = rs485Msg.getD6();
         Date createTime = Calendar.getInstance().getTime();
         if(StringUtils.isNotEmpty(data)&&StringUtils.isNotEmpty(typeCode)){
-            Integer type = Integer.parseInt(typeCode,ScaleSystem.HEX);
+            Integer type = Integer.parseInt(typeCode, ScaleSystem.HEX);
             // 数据位
             EnvironmentTypeEnum typeEnum = EnvironmentTypeEnum.getEnvironmentTypeEnumMap().get(type);
             if(typeEnum == null){

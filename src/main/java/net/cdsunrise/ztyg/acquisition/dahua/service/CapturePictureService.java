@@ -18,6 +18,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -30,9 +32,7 @@ import java.util.Vector;
 @Component
 @SuppressWarnings("all")
 public class CapturePictureService {
-    public CaptureReceiveCB m_CaptureReceiveCB = new CaptureReceiveCB();
-    // device channel list
-    private Vector<String> chnlist = new Vector<String>();
+    private CaptureReceiveCB m_CaptureReceiveCB = new CaptureReceiveCB();
     // This field indicates whether the device is playing
     private boolean bRealPlay = false;
     // This field indicates whether the device is timing capture
@@ -40,20 +40,28 @@ public class CapturePictureService {
     // realplay handle
     public static NetSDKLib.LLong m_hPlayHandle = new NetSDKLib.LLong(0);
 
-    public boolean login(String ip, int port, String username, String password) {
+    /**
+     *  登录并设置远程抓图、定时抓图的回调函数
+     * @param ip
+     * @param port
+     * @param username
+     * @param password
+     * @return list 通道列表
+     */
+    public List<String> loginAndSetCallBack(String ip, int port, String username, String password) {
         // 设置远程抓图、定时抓图的回调函数
         Native.setCallbackThreadInitializer(m_CaptureReceiveCB,
                 new CallbackThreadInitializer(false, false, "snapPicture callback thread"));
+        List<String> channelList = new ArrayList<>();
         if(LoginModule.login(ip, port, username, password)) {
             for(int i = 1; i < LoginModule.m_stDeviceInfo.byChanNum + 1; i++) {
-                chnlist.add(Res.string().getChannel() + " " + String.valueOf(i));
+                channelList.add(Res.string().getChannel() + " " + String.valueOf(i));
             }
             CapturePictureModule.setSnapRevCallBack(m_CaptureReceiveCB);
         } else {
             log.error("登录失败:{},code:{},message:{}",Res.string().getLoginFailed(),ToolKits.getErrorCodeShow(), Res.string().getErrorMessage());
-            return false;
         }
-        return true;
+        return channelList;
     }
 
     public void logout(int channel) {
@@ -62,11 +70,7 @@ public class CapturePictureService {
         }
         RealPlayModule.stopRealPlay(m_hPlayHandle);
         LoginModule.logout();
-
         bRealPlay = false;
-        for(int i = 0; i < LoginModule.m_stDeviceInfo.byChanNum; i++) {
-            chnlist.clear();
-        }
         bTimerCapture = false;
     }
 
@@ -99,7 +103,7 @@ public class CapturePictureService {
      * @param chn
      * @return
      */
-    public static boolean remoteCapturePicture(int chn){
+    public boolean remoteCapturePicture(int chn){
        return CapturePictureModule.remoteCapturePicture(chn);
     }
 
@@ -108,7 +112,7 @@ public class CapturePictureService {
      * @param chn
      * @return
      */
-    public static boolean timerCapturePicture(int chn){
+    public boolean timerCapturePicture(int chn){
         return CapturePictureModule.timerCapturePicture(chn);
     }
 
@@ -117,12 +121,25 @@ public class CapturePictureService {
      * @param chn
      * @return
      */
-    public static boolean stopCapturePicture(int chn){
+    public boolean stopCapturePicture(int chn){
         return CapturePictureModule.stopCapturePicture(chn);
     }
 
-    public class CaptureReceiveCB implements NetSDKLib.fSnapRev{
+    /**
+     * 抓图回调函数原形(pBuf内存由SDK内部申请释放)
+     */
+    private class CaptureReceiveCB implements NetSDKLib.fSnapRev{
         BufferedImage bufferedImage = null;
+        /**
+         * 回调处理
+         * @param lLoginID
+         * @param pBuf
+         * @param RevLen
+         * @param EncodeType 编码类型，10：表示jpeg图片      0：mpeg4
+         * @param CmdSerial 操作流水号
+         * @param dwUser
+         */
+        @Override
         public void invoke(NetSDKLib.LLong lLoginID, Pointer pBuf, int RevLen, int EncodeType, int CmdSerial, Pointer dwUser) {
             if(pBuf != null && RevLen > 0) {
                 String strFileName = SavePath.getSavePath().getSaveCapturePath();

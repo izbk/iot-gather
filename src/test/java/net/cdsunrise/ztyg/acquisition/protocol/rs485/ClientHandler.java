@@ -5,9 +5,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
-import net.cdsunrise.ztyg.acquisition.protocol.rs485.codec.RS485Decoder;
-import net.cdsunrise.ztyg.acquisition.protocol.rs485.constant.ScaleSystem;
-import net.cdsunrise.ztyg.acquisition.protocol.rs485.msg.RS485Msg;
+import net.cdsunrise.ztyg.acquisition.protocol.tcp.codec.RS485Decoder;
+import net.cdsunrise.ztyg.acquisition.protocol.tcp.constant.ScaleSystem;
+import net.cdsunrise.ztyg.acquisition.protocol.tcp.msg.RS485Msg;
 
 /**
  * @author Binke Zhang

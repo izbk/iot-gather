@@ -2,6 +2,9 @@ package net.cdsunrise.ztyg.acquisition.dahua.vo;
 
 import lombok.Data;
 
+/**
+ * 设备信息
+ */
 @Data
 public class DeviceInfoVo {
     private String initStatus;

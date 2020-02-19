@@ -23,10 +23,10 @@ import java.util.List;
 @SuppressWarnings("all")
 public class DeviceSearchAndInitService {
 
-    /*
+    /**
      *  设备组播和广播搜索回调
      */
-    private SearchDevicesCallback callback = new SearchDevicesCallback();
+    private static SearchDevicesCallback callback = new SearchDevicesCallback();
 
     /**
      * 初始化设备
@@ -45,8 +45,8 @@ public class DeviceSearchAndInitService {
      * @param cbSearchDevices
      * @return
      */
-    public NetSDKLib.LLong multiBroadcastDeviceSearch(NetSDKLib.fSearchDevicesCB cbSearchDevices){
-        return DeviceSearchModule.multiBroadcastDeviceSearch(cbSearchDevices);
+    public NetSDKLib.LLong multiBroadcastDeviceSearch(NetSDKLib.fSearchDevicesCB cbSearchDevicesCB){
+        return DeviceSearchModule.multiBroadcastDeviceSearch(cbSearchDevicesCB);
     }
 
     /**
@@ -68,12 +68,15 @@ public class DeviceSearchAndInitService {
         return DeviceSearchModule.unicastDeviceSearch(startIP, nIpNum, cbSearchDevicesCB);
     }
 
-    private class SearchDevicesCallback implements NetSDKLib.fSearchDevicesCB {
+    /**
+     * 异步搜索设备回调
+     */
+    private static class SearchDevicesCallback implements NetSDKLib.fSearchDevicesCB {
         @Override
         public void invoke(Pointer pDevNetInfo, Pointer pUserData) {
             NetSDKLib.DEVICE_NET_INFO_EX deviceInfo =  new NetSDKLib.DEVICE_NET_INFO_EX();
             ToolKits.GetPointerData(pDevNetInfo, deviceInfo);
-            // 获取设备数据 需测试每次返回的数据行数
+            // 获取设备数据 需测试每次返回的数据行数 TODO
 
         }
     }

@@ -7,9 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import main.java.com.netsdk.common.Res;
 import main.java.com.netsdk.lib.NetSDKLib;
 import main.java.com.netsdk.lib.ToolKits;
-import net.cdsunrise.ztyg.acquisition.dahua.module.LoginModule;
-import net.cdsunrise.ztyg.acquisition.dahua.module.RealPlayModule;
 import net.cdsunrise.ztyg.acquisition.dahua.module.ThermalCameraModule;
+import net.cdsunrise.ztyg.acquisition.dahua.vo.ThermalInfoVo;
+import net.cdsunrise.ztyg.acquisition.dahua.vo.ThermalItemInfoVo;
+import net.cdsunrise.ztyg.acquisition.dahua.vo.ThermalPointInfoVo;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
@@ -51,31 +52,16 @@ public class ThermalCameraService {
     private ReentrantLock lock = new ReentrantLock();
     private NetSDKLib.NET_RADIOMETRY_DATA gData = new NetSDKLib.NET_RADIOMETRY_DATA();
     private RadiometryAttachCB cbNotify = new RadiometryAttachCB();
-    /**
-     * 打开工程，初始化
-     * @return
-     */
-    public boolean init(){
-        return LoginModule.init(disConnect, haveReConnect);
-    }
-
-    /**
-     * 登出
-     */
-    public void logout() {
-        LoginModule.logout();
-    }
 
     /**
      * 获取测温点信息
      * @param channel
      * @param x
      * @param y
-     * @return String[] 0:meterType 1:temperUnit 2:temper
+     * @return 0:meterType 1:temperUnit 2:temper
      */
-    public String[] queryPointInfo(int channel,short x,short y){
-        NetSDKLib.NET_RADIOMETRYINFO pointInfo =
-                ThermalCameraModule.queryPointTemper(channel, x, y);
+    public ThermalPointInfoVo queryPointInfo(int channel,short x,short y){
+        NetSDKLib.NET_RADIOMETRYINFO pointInfo = ThermalCameraModule.queryPointTemper(channel, x, y);
         if (pointInfo == null) {
             log.error("获取测温点信息失败,code:{},message:{}",ToolKits.getErrorCodeShow(), Res.string().getErrorMessage());
             return null;
@@ -89,24 +75,24 @@ public class ThermalCameraService {
      * @param pointInfo
      * @return String[] 0:meterType 1:temperUnit 2:temper
      */
-    public String[] parsePointData(NetSDKLib.NET_RADIOMETRYINFO pointInfo) {
-        String[] data = new String[3];
+    private ThermalPointInfoVo parsePointData(NetSDKLib.NET_RADIOMETRYINFO pointInfo) {
+        ThermalPointInfoVo pointInfoVo = new ThermalPointInfoVo();
         String [] arrMeterType = Res.string().getMeterTypeList();
         if (pointInfo.nMeterType >= 1 &&
                 pointInfo.nMeterType <= arrMeterType.length) {
-            data[0] = arrMeterType[pointInfo.nMeterType-1];
+            pointInfoVo.setMeterType(arrMeterType[pointInfo.nMeterType-1]);
         }else {
-            data[0] = Res.string().getShowInfo("UNKNOWN");
+            pointInfoVo.setMeterType(Res.string().getShowInfo("UNKNOWN"));
         }
         String [] arrTemperUnit = Res.string().getTemperUnitList();
         if (pointInfo.nTemperUnit >= 1 &&
                 pointInfo.nTemperUnit <= arrTemperUnit.length) {
-            data[1] = arrTemperUnit[pointInfo.nTemperUnit-1];
+            pointInfoVo.setTemperUnit(arrTemperUnit[pointInfo.nTemperUnit-1]);
         }else {
-            data[1] = Res.string().getShowInfo("UNKNOWN");
+            pointInfoVo.setTemperUnit(Res.string().getShowInfo("UNKNOWN"));
         }
-        data[2] = String.valueOf(pointInfo.fTemperAver);
-        return data;
+        pointInfoVo.setTemper(String.valueOf(pointInfo.fTemperAver));
+        return pointInfoVo;
     }
 
     /**
@@ -117,10 +103,7 @@ public class ThermalCameraService {
      * @param meterType
      * @return String[] 0:meterType 1:temperUnit 2:temperAver 3:temperMax 4:temperMin 5:temperMid 6:temperStd
      */
-    public String[] queryItemInfo(int channel,int presetId,int ruleId,int meterType) {
-//            int nPresetId = Integer.parseInt(presetIdTextField.getText());
-//            int nRuleId = Integer.parseInt(ruleIdTextField.getText());
-//            int nMeterType = meterTypeComboBox.getSelectedIndex() + 1;
+    public ThermalItemInfoVo queryItemInfo(int channel,int presetId,int ruleId,int meterType) {
         NetSDKLib.NET_RADIOMETRYINFO stItemInfo =
                 ThermalCameraModule.queryItemTemper(channel, presetId, ruleId, meterType);
         if (stItemInfo == null) {
@@ -132,34 +115,33 @@ public class ThermalCameraService {
     }
 
     /**
-     *
+     * 解析测温项信息
      * @param itemInfo
      * @return String[] 0:meterType 1:temperUnit 2:temperAver 3:temperMax 4:temperMin 5:temperMid 6:temperStd
      *
      */
-    public String[] parseItemData(NetSDKLib.NET_RADIOMETRYINFO itemInfo) {
-        String[] data = new String[7];
+    private ThermalItemInfoVo parseItemData(NetSDKLib.NET_RADIOMETRYINFO itemInfo) {
+        ThermalItemInfoVo itemInfoVo = new ThermalItemInfoVo();
         String [] arrMeterType = Res.string().getMeterTypeList();
         if (itemInfo.nMeterType >= 1 &&
                 itemInfo.nMeterType <= arrMeterType.length) {
-            data[0] = arrMeterType[itemInfo.nMeterType-1];
+            itemInfoVo.setMeterType(arrMeterType[itemInfo.nMeterType-1]);
         }else {
-            data[0] = Res.string().getShowInfo("UNKNOWN");
+            itemInfoVo.setMeterType(Res.string().getShowInfo("UNKNOWN"));
         }
         String [] arrTemperUnit = Res.string().getTemperUnitList();
         if (itemInfo.nTemperUnit >= 1 &&
                 itemInfo.nTemperUnit <= arrTemperUnit.length) {
-            data[1] = arrTemperUnit[itemInfo.nTemperUnit-1];
+            itemInfoVo.setTemperUnit(arrTemperUnit[itemInfo.nTemperUnit-1]);
         }else {
-            data[1] = Res.string().getShowInfo("UNKNOWN");
+            itemInfoVo.setTemperUnit(Res.string().getShowInfo("UNKNOWN"));
         }
-        data[2] = String.valueOf(itemInfo.fTemperAver);
-        data[3] = String.valueOf(itemInfo.fTemperMax);
-        data[4] = String.valueOf(itemInfo.fTemperMin);
-        data[5] = String.valueOf(itemInfo.fTemperMid);
-        data[6] = String.valueOf(itemInfo.fTemperStd);
-
-        return data;
+        itemInfoVo.setTemperAver(String.valueOf(itemInfo.fTemperAver));
+        itemInfoVo.setTemperMax(String.valueOf(itemInfo.fTemperMax));
+        itemInfoVo.setTemperMin(String.valueOf(itemInfo.fTemperMin));
+        itemInfoVo.setTemperMid(String.valueOf(itemInfo.fTemperMid));
+        itemInfoVo.setTemperStd(String.valueOf(itemInfo.fTemperStd));
+        return itemInfoVo;
     }
 
     /**
@@ -173,7 +155,7 @@ public class ThermalCameraService {
      * @param peridIndex
      * @return
      */
-    public List<Vector<String>> dofindTemper(int page,int size,
+    public List<ThermalInfoVo> dofindTemper(int page,int size,
                                                       String startTime,String endTime,
                                                       int meterType,int channel,int peridIndex) {
         // 查询开始偏移量
@@ -234,11 +216,11 @@ public class ThermalCameraService {
      * @param stuDoFind
      * @return
      */
-    private List<Vector<String>> parseTemperDataToList(NetSDKLib.NET_OUT_RADIOMETRY_DOFIND stuDoFind) {
+    private List<ThermalInfoVo> parseTemperDataToList(NetSDKLib.NET_OUT_RADIOMETRY_DOFIND stuDoFind) {
         if (stuDoFind == null) {
             return null;
         }
-        List<Vector<String>> data = new ArrayList<>(stuDoFind.nFound);
+        List<ThermalInfoVo> data = new ArrayList<>(stuDoFind.nFound);
         for (int i = 0; i < stuDoFind.nFound; ++i) {
             data.add(parseTemperData(stuDoFind.stInfo[i]));
         }
@@ -250,45 +232,45 @@ public class ThermalCameraService {
      * @param data
      * @return
      */
-    private Vector<String> parseTemperData(NetSDKLib.NET_RADIOMETRY_QUERY data) {
-        Vector<String> vector = new Vector<String>();
-        vector.add(data.stTime.toStringTimeEx());
-        vector.add(String.valueOf(data.nPresetId));
-        vector.add(String.valueOf(data.nRuleId));
+    private ThermalInfoVo parseTemperData(NetSDKLib.NET_RADIOMETRY_QUERY data) {
+        ThermalInfoVo thermalInfoVo = new ThermalInfoVo();
+        thermalInfoVo.setTime(data.stTime.toStringTimeEx());
+        thermalInfoVo.setPresetId(data.nPresetId);
+        thermalInfoVo.setRuleId(data.nRuleId);
         try {
-            vector.add(new String(data.szName, "GBK").trim());
+            thermalInfoVo.setName(new String(data.szName, "GBK").trim());
         } catch (UnsupportedEncodingException e) {
-            vector.add(new String(data.szName).trim());
+            thermalInfoVo.setName(new String(data.szName).trim());
         }
-        vector.add(String.valueOf(data.nChannel));
+        thermalInfoVo.setChannel(data.nChannel);
 
         if (data.stTemperInfo.nMeterType == NetSDKLib.NET_RADIOMETRY_METERTYPE.NET_RADIOMETRY_METERTYPE_SPOT) {
-            vector.add("(" + data.stCoordinate.nx + "," + data.stCoordinate.ny + ")");
+            thermalInfoVo.setCoordinate("(" + data.stCoordinate.nx + "," + data.stCoordinate.ny + ")");
         }else {
-            vector.add(" ");
+            thermalInfoVo.setCoordinate(" ");
         }
 
         if (data.stTemperInfo.nMeterType >= 1 &&
                 data.stTemperInfo.nMeterType <= arrMeterType.length) {
-            vector.add(arrMeterType[data.stTemperInfo.nMeterType-1]);
+            thermalInfoVo.setMeterType(arrMeterType[data.stTemperInfo.nMeterType-1]);
         }else {
-            vector.add(Res.string().getShowInfo("UNKNOWN"));
+            thermalInfoVo.setMeterType(Res.string().getShowInfo("UNKNOWN"));
         }
 
         if (data.stTemperInfo.nTemperUnit >= 1 &&
                 data.stTemperInfo.nTemperUnit <= arrTemperUnit.length) {
-            vector.add(arrTemperUnit[data.stTemperInfo.nTemperUnit-1]);
+            thermalInfoVo.setTemperUnit(arrTemperUnit[data.stTemperInfo.nTemperUnit-1]);
         }else {
-            vector.add(Res.string().getShowInfo("UNKNOWN"));
+            thermalInfoVo.setTemperUnit(Res.string().getShowInfo("UNKNOWN"));
         }
 
-        vector.add(String.valueOf(data.stTemperInfo.fTemperAver));
-        vector.add(String.valueOf(data.stTemperInfo.fTemperMax));
-        vector.add(String.valueOf(data.stTemperInfo.fTemperMin));
-        vector.add(String.valueOf(data.stTemperInfo.fTemperMid));
-        vector.add(String.valueOf(data.stTemperInfo.fTemperStd));
+        thermalInfoVo.setTemperAver(String.valueOf(data.stTemperInfo.fTemperAver));
+        thermalInfoVo.setTemperMax(String.valueOf(data.stTemperInfo.fTemperMax));
+        thermalInfoVo.setTemperMin(String.valueOf(data.stTemperInfo.fTemperMin));
+        thermalInfoVo.setTemperMid(String.valueOf(data.stTemperInfo.fTemperMid));
+        thermalInfoVo.setTemperStd(String.valueOf(data.stTemperInfo.fTemperStd));
 
-        return vector;
+        return thermalInfoVo;
     }
 
     /**

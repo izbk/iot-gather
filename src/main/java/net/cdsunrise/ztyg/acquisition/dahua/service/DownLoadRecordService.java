@@ -1,5 +1,6 @@
 package net.cdsunrise.ztyg.acquisition.dahua.service;
 
+import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import lombok.extern.slf4j.Slf4j;
 import main.java.com.netsdk.common.Res;
@@ -22,12 +23,16 @@ import java.util.List;
 @Component
 @SuppressWarnings("all")
 public class DownLoadRecordService {
+    // 按时间下载句柄
+    private NetSDKLib.LLong m_hDownLoadByTimeHandle = new NetSDKLib.LLong(0);
+    // 按文件下载句柄
+    private NetSDKLib.LLong m_hDownLoadByFileHandle = new NetSDKLib.LLong(0);
     /**
      * 查找录像文件
      * @param channelId
      * @param startTime
      * @param endTime
-     * @return
+     * @return string[] 0:通道 1:录像类型 2:开始时间 3:结束时间
      */
     public List<String[]> queryRecordFile(int channelId,
                                           String startTime,
@@ -108,23 +113,23 @@ public class DownLoadRecordService {
 
     /**
      *  设置回放时的码流类型
-     * @param m_streamType 码流类型
+     * @param m_streamType 码流类型 0-主辅码流,1-主码流,2-辅码流
      */
-    public static void setStreamType(int streamType){
+    public void setStreamType(int streamType){
         DownLoadRecordModule.setStreamType(streamType);
     }
 
     /**
      *  下载录像文件
      * @param nChannelId
-     * @param nRecordFileType
+     * @param nRecordFileType 0:所有录像 1:外部报警录像 2:动态检测报警录像 3:所有报警录像 4:卡号查询 5:按条件查询 6:组合查询 8:按卡号查询图片,HB-U、NVS等使用 9:查询图片,HB-U、NVS等使用 10:按字段查询 11:智能录像查询 15:查询网络数据,金桥网吧等使用 16:查询透明串口数据录像 17:查询重要录像 18:查询录音文件
      * @param startTime
      * @param endTime
      * @param SavedFileName
      * @param cbTimeDownLoadPos
      * @return
      */
-    public NetSDKLib.LLong downloadRecordFile(int nChannelId,
+    public NetSDKLib.LLong downloadRecordByFile(int nChannelId,
                                                      int nRecordFileType,
                                                      String startTime,
                                                      String endTime,
@@ -158,12 +163,9 @@ public class DownLoadRecordService {
         stTimeEnd.dwHour = Integer.parseInt(dateEndByFile2[0]);
         stTimeEnd.dwMinute = Integer.parseInt(dateEndByFile2[1]);
         stTimeEnd.dwSecond = Integer.parseInt(dateEndByFile2[2]);
-        return DownLoadRecordModule.downloadRecordFile(nChannelId,
-                nRecordFileType,
-                stTimeStart,
-                stTimeEnd,
-                SavePath.getSavePath().getSaveRecordFilePath(),
-                null);
+
+        return DownLoadRecordModule.downloadRecordFile(nChannelId,nRecordFileType,stTimeStart,
+                stTimeEnd,SavePath.getSavePath().getSaveRecordFilePath(),downLoadPosCallBack);
     }
 
     /**
@@ -174,4 +176,21 @@ public class DownLoadRecordService {
         DownLoadRecordModule.stopDownLoadRecordFile(downLoadHandle);
     }
 
+    /**
+     * 文件下载回调
+     */
+    private DownLoadPosCallBack downLoadPosCallBack = new DownLoadPosCallBack();
+    class DownLoadPosCallBack implements NetSDKLib.fTimeDownLoadPosCallBack{
+        @Override
+        public void invoke(NetSDKLib.LLong lLoginID, final int dwTotalSize, final int dwDownLoadSize, int index, NetSDKLib.NET_RECORDFILE_INFO.ByValue recordfileinfo, Pointer dwUser) {
+            new Thread(() -> {
+                log.info("ByTime :{}", dwDownLoadSize + " / " + dwTotalSize);
+                log.info("progress:{}", dwDownLoadSize*100 / dwTotalSize);
+                if(dwDownLoadSize == -1) {
+                    log.info("progress:100%");
+                    stopDownLoadRecordFile(m_hDownLoadByFileHandle);
+                }
+            });
+        }
+    }
 }

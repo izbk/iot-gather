@@ -134,9 +134,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.netsdk</groupId>
+            <groupId>com.dahua</groupId>
             <artifactId>netsdk</artifactId>
-            <version>1.0-demo</version>
+            <version>1.0</version>
         </dependency>
 
     </dependencies>

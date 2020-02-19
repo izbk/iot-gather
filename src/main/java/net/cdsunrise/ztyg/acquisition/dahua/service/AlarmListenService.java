@@ -57,7 +57,6 @@ public class AlarmListenService {
      */
      private class AlarmDataCB implements NetSDKLib.fMessCallBack {
          private final EventQueue eventQueue = Toolkit.getDefaultToolkit().getSystemEventQueue();
-
          @Override
          public boolean invoke(int lCommand, NetSDKLib.LLong lLoginID,
                                Pointer pStuEvent, int dwBufLen, String strDeviceIP,

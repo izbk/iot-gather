@@ -59,7 +59,7 @@ public class RS485Component {
     }
 
     @SuppressWarnings("Duplicates")
-    private RS485Msg send2(RS485Msg msg,String ip,Integer port){
+    private RS485Msg send2(RS485Msg msg, String ip, Integer port){
         ChannelHandlerContext ctx = syncClientHandler.getCtx();
         if(ctx == null){
             connect(rs485BootStrap,ip,port);

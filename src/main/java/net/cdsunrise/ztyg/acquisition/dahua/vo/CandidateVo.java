@@ -3,6 +3,7 @@ package net.cdsunrise.ztyg.acquisition.dahua.vo;
 import lombok.Data;
 
 /**
+ * 候选人信息
  * @author Binke Zhang
  * @date 2020/2/17 10:41
  */

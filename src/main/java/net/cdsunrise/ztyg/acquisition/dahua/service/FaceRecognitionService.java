@@ -320,7 +320,7 @@ public class FaceRecognitionService {
     }
 
     /**
-     * 解析人脸识别信息
+     * 解析人脸识别数据信息
      * @param facerecognitionInfo
      * @param index
      * @return
@@ -334,7 +334,7 @@ public class FaceRecognitionService {
         // 时间
         if(facerecognitionInfo.UTC != null
                 && !facerecognitionInfo.UTC.toString().equals("")) {
-            faceRecognitionInfoVo.setTime(facerecognitionInfo.UTC.toString());
+            faceVo.setTime(facerecognitionInfo.UTC.toString());
         }
 
         // 人脸信息
@@ -389,7 +389,7 @@ public class FaceRecognitionService {
         // 时间
         if(facedetectInfo.UTC != null
                 && !facedetectInfo.UTC.toString().equals("")) {
-            faceRecognitionInfoVo.setTime(facedetectInfo.UTC.toString());
+            faceVo.setTime(facedetectInfo.UTC.toString());
         }
 
         // 人脸信息
