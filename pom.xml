@@ -120,25 +120,6 @@
             <version>1.1.2</version>
         </dependency>
 
-        <!-- 大华SDK -->
-        <dependency>
-            <groupId>com.dahua</groupId>
-            <artifactId>jna</artifactId>
-            <version>1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.dahua</groupId>
-            <artifactId>examples</artifactId>
-            <version>1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.dahua</groupId>
-            <artifactId>netsdk</artifactId>
-            <version>1.0</version>
-        </dependency>
-
     </dependencies>
     <build>
         <plugins>

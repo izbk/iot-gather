@@ -1,7 +1,7 @@
 package net.cdsunrise.ztyg.acquisition;
 
-import main.java.com.netsdk.demo.module.LoginModule;
 import net.cdsunrise.ztyg.acquisition.common.utils.NativeLoader;
+import net.cdsunrise.ztyg.acquisition.dahua.module.LoginModule;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -32,7 +32,7 @@ public class AcquisitionApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        LoginModule.login("172.23.12.17",37777,"admin","admin");
+        LoginModule.login("192.168.10.247",37777,"admin","admin1234");
     }
 
     @Bean
